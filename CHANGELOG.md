@@ -1,5 +1,32 @@
 # Changelog
 
+## 3.5.0 — 2026-10-28
+
+New look: the whole app is redesigned around a doodled-planner visual system — warm paper canvas, inkwell-navy workhorse color, and mint / butter / coral as small functional accents. A new minimal footprints logo replaces the sprout everywhere. No behavior changed: tasks, timer, history, backups and shortcuts work exactly as before.
+
+### Changed
+
+- **Design system:** light theme rebuilt from the reference — Ash Canvas `#f2f2f2` page background, Paper White cards, Inkwell Navy `#151b31` text/buttons/borders, Mint `#86e0c1` for live/success badges and charts, Butter `#fedf89` for the tip box and break states, Coral `#ff5858` for emphasis (focus ring, today's bar, squiggle underline). 8/16/24px radii and warm-stone card shadows.
+- **Typography:** headings and the splash wordmark now use Bagel Fat One (bundled WOFF2, latin + latin-ext with full Turkish support); UI text uses Inter (bundled variable WOFF2). Both load offline — no CDN. Fonts are part of the service-worker cache and the Android build.
+- **Layout:** the main flow is a single roomy column (max 760px) instead of the old two-column grid; cards stack tasks → timer → forest → stats on every screen size.
+- **Dark theme:** warm navy surfaces with white primary buttons (inverse-button pattern). Sepia and high-contrast themes keep their purpose, recolored to match.
+- **Doodle accents:** footprints brand mark in the header, coral squiggle under the title, soft mint/butter background blobs (hidden in high-contrast and print).
+
+### Logo & branding
+
+- **New minimal logo:** two white footprints stepping up-right on an inkwell-navy rounded square — replaces the sprout. Updated: `icon.svg` (PWA), Android adaptive icon (foreground + `#151b31` background), all launcher PNGs (legacy + round, every density), all 11 Android splash PNGs (port + land), the in-app splash screen, `social-preview.png` and the README logo.
+
+### Screenshots
+
+- `docs/screenshots/desktop.png` and `mobile.png` re-captured with the new design (same seeded demo data style, DPR 2).
+
+### Internal
+
+- `manifest.json`: `theme_color` `#151b31`, `background_color` `#f2f2f2`, version 3.5.0.
+- `sw.js`: cache `minik-adimlar-v3.5.0`, fonts added to the asset list.
+- `scripts/build-app.mjs` copies the `fonts/` directory into `www/` for the APK.
+- `test.html` dev harness recolored to the new palette.
+
 ## 3.4.0 — 2026-10-22
 
 Android app + GitHub star badge. The repository is renamed to `small-steps` (old links redirect).

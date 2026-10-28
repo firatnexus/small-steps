@@ -2,8 +2,8 @@
   "name": "Small Steps — Your daily focus space",
   "short_name": "Small Steps",
   "description": "Task list and Pomodoro timer. A calm, offline-first focus app in 12 languages — no account, no tracking.",
-  "version": "3.4.0",
-  "version_name": "3.4.0",
+  "version": "3.5.0",
+  "version_name": "3.5.0",
   "lang": "en",
   "dir": "ltr",
   "start_url": "./index.html",
@@ -14,8 +14,8 @@
     "minimal-ui"
   ],
   "orientation": "any",
-  "background_color": "#f5f7f2",
-  "theme_color": "#267354",
+  "background_color": "#f2f2f2",
+  "theme_color": "#151b31",
   "categories": [
     "productivity",
     "lifestyle",
