@@ -14,6 +14,7 @@ mkdirSync(WWW, { recursive: true });
 const FILES = ['index.html', 'app.js', 'style.css', 'translations.js', 'icon.svg', 'manifest.json',
   'fonts/inter-latin.woff2', 'fonts/inter-latin-ext.woff2',
   'fonts/bagel-latin.woff2', 'fonts/bagel-latin-ext.woff2'];
+mkdirSync(path.join(WWW, 'fonts'), { recursive: true });
 for (const f of FILES) {
   copyFileSync(path.join(ROOT, f), path.join(WWW, f));
   console.log('kopyalandı:', f);
