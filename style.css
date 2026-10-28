@@ -663,18 +663,19 @@ button, .chip, .icon-btn, .icon-button { touch-action: manipulation; }
 .prio-btn[data-level="2"] { color: var(--gold); }
 .prio-btn[data-level="3"] { color: var(--danger); }
 
-/* Recurrence button (v3.2) */
+/* Recurrence button (v3.2) — mint fill is theme-invariant, so the
+   glyph stays fixed navy for contrast in every theme */
 .repeat-btn { color: var(--muted); }
-.repeat-btn.is-active { color: var(--ink); background: var(--green); }
+.repeat-btn.is-active { color: #151b31; background: var(--green); }
 .repeat-pill { color: var(--ink); }
 .due-pill { color: var(--danger); }
 .task.prio-1 { border-inline-start: 3px solid var(--muted); }
 .task.prio-2 { border-inline-start: 3px solid var(--gold); }
 .task.prio-3 { border-inline-start: 3px solid var(--danger); }
 
-/* Focus task button */
+/* Focus task button — same invariant-mint rule as above */
 .focus-btn { font-size: 1.05rem; }
-.focus-btn.is-active { color: var(--ink); background: var(--green); }
+.focus-btn.is-active { color: #151b31; background: var(--green); }
 .task-meta { flex: none; display: flex; align-items: center; gap: 6px; }
 .focus-pill {
   padding: 3px 9px; border-radius: 8px;
