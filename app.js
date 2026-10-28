@@ -24,7 +24,7 @@
   const THEMES = ["light", "dark", "sepia", "contrast"];
   const THEME_ICONS = { light: "☀️", dark: "🌙", sepia: "📜", contrast: "◐" };
   const THEME_META_COLORS = {
-    light: "#f5f7f2", dark: "#0e1512", sepia: "#f4ecd8", contrast: "#000000"
+    light: "#f2f2f2", dark: "#14161e", sepia: "#f4ecd8", contrast: "#000000"
   };
   const THEME_I18N = {
     light: "themeLight", dark: "themeDark",
