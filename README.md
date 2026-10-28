@@ -9,7 +9,7 @@ Zero dependencies · 12 languages · Installable PWA · Your data never leaves y
 
 <br/>
 
-[![Version](https://img.shields.io/badge/version-3.5.0-151b31?style=flat-square)](../../releases)
+[![Version](https://img.shields.io/badge/version-3.5.1-151b31?style=flat-square)](../../releases)
 [![Android APK](https://img.shields.io/badge/Android-APK-3ddc84?style=flat-square&logo=android&logoColor=white)](../../releases)
 [![CI](https://img.shields.io/badge/CI-passing-151b31?style=flat-square)](../../actions)
 [![PWA](https://img.shields.io/badge/PWA-installable-5a0fc8?style=flat-square)](#-pwa-installation)

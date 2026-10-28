@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.5.1 — 2026-10-28
+
+Patch release fixing two visual defects found in the 3.5.0 redesign. No functional changes.
+
+### Fixed
+
+- **Dark theme button contrast:** the active Focus and Repeat buttons on mint background now use inkwell-navy glyphs in every theme (they were near-white in dark mode).
+- **Generated assets:** all Android splash screens and the social preview card were regenerated — the "Small Steps" wordmark now renders in Bagel Fat One (a font-loading issue in the asset generator had silently fallen back to a generic serif, and a stale-cache issue had mis-scaled some images).
+
 ## 3.5.0 — 2026-10-28
 
 New look: the whole app is redesigned around a doodled-planner visual system — warm paper canvas, inkwell-navy workhorse color, and mint / butter / coral as small functional accents. A new minimal footprints logo replaces the sprout everywhere. No behavior changed: tasks, timer, history, backups and shortcuts work exactly as before.
