@@ -7,7 +7,7 @@
    ============================================================ */
 /* Sürüm notu: app.js / style.css / translations.js değişirse bu adımı
    güncelle — aksi halde eski önbellek yeni kullanıcılara ulaşmaz. */
-const CACHE = "minik-adimlar-v3.5.1";
+const CACHE = "minik-adimlar-v3.6.0";
 
 const ASSETS = [
   "./",
@@ -19,8 +19,6 @@ const ASSETS = [
   "./icon.svg",
   "./fonts/inter-latin.woff2",
   "./fonts/inter-latin-ext.woff2",
-  "./fonts/bagel-latin.woff2",
-  "./fonts/bagel-latin-ext.woff2",
   "./social-preview.png"
 ];
 

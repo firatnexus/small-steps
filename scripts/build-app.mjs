@@ -12,8 +12,7 @@ const WWW = path.join(ROOT, 'www');
 mkdirSync(WWW, { recursive: true });
 
 const FILES = ['index.html', 'app.js', 'style.css', 'translations.js', 'icon.svg', 'manifest.json',
-  'fonts/inter-latin.woff2', 'fonts/inter-latin-ext.woff2',
-  'fonts/bagel-latin.woff2', 'fonts/bagel-latin-ext.woff2'];
+  'fonts/inter-latin.woff2', 'fonts/inter-latin-ext.woff2'];
 mkdirSync(path.join(WWW, 'fonts'), { recursive: true });
 for (const f of FILES) {
   copyFileSync(path.join(ROOT, f), path.join(WWW, f));
@@ -25,7 +24,11 @@ for (const f of FILES) {
 const idxPath = path.join(WWW, 'index.html');
 let html = readFileSync(idxPath, 'utf8');
 html = html.replace(/\s*<link rel="manifest" href="manifest\.json">/, '');
+/* v3.6: APK, Things referanslı "app" görünümünü kullanır (web: Todoist). */
+html = html.replace('<html lang="tr" data-platform="web">', '<html lang="tr" data-platform="app">');
+html = html.replace('<meta name="theme-color" content="#fefdfc">', '<meta name="theme-color" content="#f2f5f7">');
 writeFileSync(idxPath, html);
+console.log('index.html: data-platform="app" ayarlandı');
 console.log('index.html: manifest bağlantısı kaldırıldı (APK içinde gereksiz)');
 
 console.log('www/ hazır.');
