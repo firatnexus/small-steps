@@ -1061,3 +1061,74 @@ button, .chip, .icon-btn, .icon-button { touch-action: manipulation; }
   [data-platform="app"] .card { padding: 16px; }
   [data-platform="app"] .timer-card { padding: 20px 16px; }
 }
+
+/* ============================================================
+   15. v3.6.1 — SAFE AREA + LANGUAGE MENU
+   ============================================================ */
+
+/* Top safe area. viewport-fit=cover + Capacitor 8 (Android WebView ≥140)
+   draws the page edge-to-edge under the status bar; on iOS standalone PWAs
+   the same happens. Before 3.6.1 no rule applied the top inset, so the
+   top bar slid under the status bar. Capacitor's SystemBars plugin injects
+   --safe-area-inset-top (correct on every WebView version, 0 when the
+   WebView is already padded natively); browsers expose env(). Applied once
+   on <body> so the many .wrap padding-top breakpoints stay untouched and
+   nothing is padded twice. */
+:root { --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px)); }
+body { padding-top: var(--safe-top); }
+
+/* Language menu: trigger keeps the .lang-select look of each skin */
+.topbar .lang-menu { position: relative; margin-inline-end: auto; min-width: 0; }
+.topbar .lang-menu .lang-select { margin-inline-end: 0; }
+.lang-trigger {
+  display: inline-flex; align-items: center; max-width: min(190px, 60vw);
+  text-align: start; line-height: 1.25; white-space: nowrap;
+}
+.lang-trigger-label { overflow: hidden; text-overflow: ellipsis; }
+.lang-option:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.lang-menu.is-open .lang-trigger { background-color: var(--soft); }
+@media (max-width: 720px) { .lang-trigger { max-width: 150px; } }
+
+.lang-list {
+  position: absolute; z-index: 40; top: calc(100% + 6px);
+  inset-inline-start: 0; translate: var(--lang-shift, 0px) 0;
+  margin: 0; padding: 6px; list-style: none;
+  width: max-content; overflow-y: auto; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--card); color: var(--ink);
+  border: 1px solid var(--line-strong); border-radius: 12px;
+  box-shadow: var(--shadow-pop);
+  opacity: 0; transform: translateY(-4px) scale(.98);
+  transform-origin: top left;
+  transition: opacity 140ms ease-out, transform 160ms cubic-bezier(.2, .8, .2, 1);
+}
+[dir="rtl"] .lang-list { transform-origin: top right; }
+.lang-list.is-open { opacity: 1; transform: none; }
+.lang-list[hidden] { display: none; }
+.lang-list:focus { outline: none; }
+
+.lang-option {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  min-height: 40px; padding: 8px 10px 8px 12px; border-radius: 8px;
+  font-size: .95rem; font-weight: 500; cursor: pointer; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.lang-option + .lang-option { margin-top: 2px; }
+.lang-option.is-active { background: var(--soft); }
+.lang-option:active { background: var(--line); }
+.lang-option[aria-selected="true"] { color: var(--brand-text, var(--brand)); font-weight: 650; }
+.lang-check { flex: none; opacity: 0; color: var(--brand); }
+.lang-option[aria-selected="true"] .lang-check { opacity: 1; }
+@media (hover: none) and (pointer: coarse) { .lang-option { min-height: 46px; } }
+
+/* App skin: Things-like rounded surface, no border, soft shadow */
+[data-platform="app"] .lang-list { border-color: transparent; border-radius: 16px; }
+[data-platform="app"] .lang-option { border-radius: 10px; }
+/* High contrast: solid border, no shadow, clear selection */
+[data-theme="contrast"] .lang-list { border-width: 2px; border-color: var(--ink); }
+[data-theme="contrast"] .lang-option.is-active { outline: 2px solid var(--ink); outline-offset: -2px; background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lang-list { transition: none; transform: none; }
+}
+@media print { .lang-list { display: none !important; } }

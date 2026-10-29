@@ -374,6 +374,17 @@
 
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", THEME_META_COLORS[theme]);
+
+    /* v3.6.1: Android'de sayfa durum çubuğunun altına çizilir (edge-to-edge).
+       Varsayılan "DEFAULT" stil telefonun sistem temasını izler; uygulama açık
+       temadayken telefon koyu moddaysa beyaz simgeler açık zeminde kaybolur.
+       Simge rengini uygulamanın kendi temasına bağla. LIGHT = koyu simgeler
+       (açık zemin için), DARK = açık simgeler. */
+    const bars = window.Capacitor?.Plugins?.SystemBars;
+    if (bars && typeof bars.setStyle === "function") {
+      const lightBg = theme === "light" || theme === "sepia";
+      Promise.resolve(bars.setStyle({ style: lightBg ? "LIGHT" : "DARK" })).catch(() => {});
+    }
   }
 
   function initTheme() {
@@ -468,6 +479,24 @@
     return btn;
   }
 
+  /* v3.6.1: Satır içi giriş alanlarına odaklanır, sayfayı gereksiz yere
+     kaydırmaz. Varsayılan focus() mobil Chrome'da alanı ekranın ORTASINA
+     çeker (görünür olsa bile birkaç yüz piksel sıçrama). Burada önce
+     preventScroll ile odaklanılır; alan görünür alanın (visualViewport —
+     sanal klavye açıkken küçülen alan) dışındaysa yalnızca en yakın kenara
+     kaydırılır. Klavye açıldığında tarayıcı odaklı alanı yine görünür tutar. */
+  function focusField(el) {
+    if (!el) return;
+    try { el.focus({ preventScroll: true }); } catch { el.focus(); }
+    const vv = window.visualViewport;
+    const top = vv ? vv.offsetTop : 0;
+    const bottom = top + (vv ? vv.height : window.innerHeight);
+    const r = el.getBoundingClientRect();
+    if ((r.top < top + 8 || r.bottom > bottom - 8) && typeof el.scrollIntoView === "function") {
+      el.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }
+
   function startEdit(item, task) {
     if (item.querySelector(".edit-input")) return;
     const textEl = item.querySelector(".task-text");
@@ -479,7 +508,7 @@
     editInput.setAttribute("aria-label", t("taskAriaEdit"));
 
     item.replaceChild(editInput, textEl);
-    editInput.focus();
+    focusField(editInput);
     editInput.setSelectionRange(editInput.value.length, editInput.value.length);
 
     let finished = false;
@@ -710,7 +739,7 @@
 
     row.append(input, addBtn);
     item.appendChild(row);
-    input.focus();
+    focusField(input);
 
     let finished = false;
     const finish = (commit) => {
@@ -1068,11 +1097,24 @@
     scrollForestToToday();
   }
 
+  /* v3.6.1: Yalnızca orman şeridini YATAY kaydırır. Eskiden
+     scrollIntoView({block:"nearest"}) kullanılıyordu; bu, kaydırılabilir tüm
+     ataları — pencere dahil — kaydırdığından her görev ekleme/filtre/silme
+     (renderTasks → renderStats → renderForest) ve mobil klavye açılışındaki
+     resize olayı sayfayı orman kartına atlatıyordu. Burada sadece
+     forestScene.scrollLeft değişir; sayfanın dikey konumu korunur.
+     Göreli fark (rect farkı) LTR ve RTL'de aynı yönde çalışır. */
   function scrollForestToToday() {
+    const scene = els.forestScene;
     const todayCluster = els.forestDays?.querySelector(".day-cluster.today");
-    if (todayCluster && els.forestScene && els.forestScene.scrollWidth > els.forestScene.clientWidth) {
-      todayCluster.scrollIntoView({ block: "nearest", inline: "nearest" });
-    }
+    if (!todayCluster || !scene || scene.scrollWidth <= scene.clientWidth) return;
+    const s = scene.getBoundingClientRect();
+    const c = todayCluster.getBoundingClientRect();
+    const pad = 8;
+    let dx = 0;
+    if (c.right > s.right - pad) dx = c.right - (s.right - pad);
+    else if (c.left < s.left + pad) dx = c.left - (s.left + pad);
+    if (dx) scene.scrollLeft += dx;
   }
 
   /* ---------- 90 günlük ısı haritası ---------- */
@@ -1337,8 +1379,8 @@
       }
 
       if (typeof data.language === "string" && window.i18n.SUPPORTED_LANGS.includes(data.language)) {
+        els.langSelect.value = data.language; // önce değer: dil menüsü etiketi doğru dili okusun
         setLanguage(data.language);
-        els.langSelect.value = data.language;
       }
       if (typeof data.theme === "string" && THEMES.includes(data.theme)) {
         applyTheme(data.theme);
@@ -1580,7 +1622,7 @@
         priority: 0, focus: 0, parentId: null
       });
       save(); renderTasks();
-      els.form.reset(); els.input.focus();
+      els.form.reset(); focusField(els.input);
     });
 
     els.filters.addEventListener("click", (e) => {
@@ -1830,6 +1872,187 @@
     els.setSound.checked = state.settings.sound;
   }
 
+  /* ---------- Dil menüsü (v3.6.1) ----------
+     Yerel <select> açılır listesi mobilde ekranın ortasında kopuk, büyük bir
+     sistem diyaloğu olarak açılıyordu. Yerine tetikleyiciye bağlı bir liste
+     (WAI-ARIA "select-only combobox / listbox" deseni) kullanılır.
+     - Gizli #lang-select tek doğruluk kaynağıdır: seçim ona yazılır ve
+       "change" olayı tetiklenir → mevcut setLanguage akışı aynen çalışır.
+     - Liste görünür alana sığmazsa kendi içinde kayar (max-height, JS).
+     - Dışarı dokununca, Esc'te, seçimde ve Tab ile kapanır.
+     - Odak hareketleri preventScroll ile yapılır; sayfa kaydırılmaz. */
+  function initLangMenu() {
+    const menu = $("#lang-menu");
+    const trigger = $("#lang-trigger");
+    const label = $("#lang-trigger-label");
+    const list = $("#lang-list");
+    const select = els.langSelect;
+    if (!menu || !trigger || !list || !select) return;
+
+    const CHECK = '<svg class="lang-check" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const focusNoScroll = (el) => { try { el.focus({ preventScroll: true }); } catch { el.focus(); } };
+
+    function build() {
+      list.replaceChildren(...Array.from(select.options).map((opt, i) => {
+        const li = document.createElement("li");
+        li.id = `lang-opt-${opt.value}`;
+        li.className = "lang-option";
+        li.setAttribute("role", "option");
+        li.dataset.value = opt.value;
+        li.tabIndex = -1;
+        li.lang = opt.value;
+        const name = document.createElement("span");
+        name.className = "lang-option-name";
+        name.textContent = opt.textContent;
+        li.append(name);
+        li.insertAdjacentHTML("beforeend", CHECK);
+        return li;
+      }));
+      sync();
+    }
+
+    function sync() {
+      const current = select.value;
+      const opt = select.selectedOptions[0];
+      label.textContent = opt ? opt.textContent : current;
+      list.querySelectorAll(".lang-option").forEach((li) => {
+        li.setAttribute("aria-selected", li.dataset.value === current ? "true" : "false");
+      });
+    }
+
+    const options = () => Array.from(list.querySelectorAll(".lang-option"));
+    const isOpen = () => trigger.getAttribute("aria-expanded") === "true";
+
+    /* Listeyi tetikleyicinin hemen altına, görünür alan içinde yerleştirir.
+       Genişlik: tetikleyiciden dar olmaz, ekrandan taşmaz. Alt boşluk yetmezse
+       yükseklik kısılır ve liste kendi içinde kayar. */
+    function place() {
+      const vv = window.visualViewport;
+      const vh = vv ? vv.height : window.innerHeight;
+      const vw = document.documentElement.clientWidth || window.innerWidth;
+      const r = trigger.getBoundingClientRect();
+      const gap = 6, margin = 12;
+      const width = Math.min(Math.max(r.width, 220), vw - margin * 2);
+      list.style.minWidth = `${width}px`;
+      list.style.maxWidth = `${vw - margin * 2}px`;
+      /* Yatay taşma: başlangıç kenarından hizala, gerekirse içeri kaydır */
+      list.style.setProperty("--lang-shift", "0px");
+      const rtl = document.documentElement.dir === "rtl";
+      const lr = list.getBoundingClientRect();
+      let shift = 0;
+      if (!rtl && lr.right > vw - margin) shift = (vw - margin) - lr.right;
+      if (rtl && lr.left < margin) shift = margin - lr.left;
+      list.style.setProperty("--lang-shift", `${shift}px`);
+      const avail = Math.max(160, vh - (r.bottom - (vv ? vv.offsetTop : 0)) - gap - margin);
+      list.style.maxHeight = `${Math.min(avail, 420)}px`;
+    }
+
+    function keepVisible(li) {
+      /* scrollIntoView sayfayı da kaydırabilir; yalnızca listeyi kaydır */
+      const top = li.offsetTop, bottom = top + li.offsetHeight;
+      if (top < list.scrollTop) list.scrollTop = top - 4;
+      else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight + 4;
+    }
+
+    function setActive(li) {
+      if (!li) return;
+      options().forEach((o) => o.classList.toggle("is-active", o === li));
+      list.setAttribute("aria-activedescendant", li.id);
+      focusNoScroll(li);
+      keepVisible(li);
+    }
+
+    function open() {
+      if (isOpen()) return;
+      sync();
+      list.hidden = false;
+      trigger.setAttribute("aria-expanded", "true");
+      menu.classList.add("is-open");
+      place();
+      /* Bir sonraki karede açılış geçişi başlar (opacity/transform) */
+      requestAnimationFrame(() => list.classList.add("is-open"));
+      setActive(options().find((o) => o.dataset.value === select.value) || options()[0]);
+      document.addEventListener("pointerdown", onOutside, true);
+      window.addEventListener("resize", place);
+      window.visualViewport?.addEventListener("resize", place);
+    }
+
+    function close({ restoreFocus = true } = {}) {
+      if (!isOpen()) return;
+      trigger.setAttribute("aria-expanded", "false");
+      menu.classList.remove("is-open");
+      list.classList.remove("is-open");
+      list.hidden = true;
+      list.removeAttribute("aria-activedescendant");
+      document.removeEventListener("pointerdown", onOutside, true);
+      window.removeEventListener("resize", place);
+      window.visualViewport?.removeEventListener("resize", place);
+      if (restoreFocus) focusNoScroll(trigger);
+    }
+
+    function choose(value) {
+      if (value && value !== select.value) {
+        select.value = value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      sync();
+      close();
+    }
+
+    function onOutside(e) {
+      if (!menu.contains(e.target)) close({ restoreFocus: false });
+    }
+
+    trigger.addEventListener("click", () => (isOpen() ? close() : open()));
+    trigger.addEventListener("keydown", (e) => {
+      if (["ArrowDown", "ArrowUp", "Enter", " "].includes(e.key)) {
+        e.preventDefault(); e.stopPropagation(); // Space zamanlayıcı kısayoluna gitmesin
+        open();
+        if (e.key === "ArrowUp") { const o = options(); setActive(o[o.length - 1]); };
+      } else if (e.key === "Escape" && isOpen()) {
+        e.preventDefault(); e.stopPropagation(); close();
+      }
+    });
+
+    list.addEventListener("click", (e) => {
+      const li = e.target.closest(".lang-option");
+      if (li) choose(li.dataset.value);
+    });
+    list.addEventListener("keydown", (e) => {
+      const opts = options();
+      const i = opts.indexOf(document.activeElement);
+      e.stopPropagation(); // sayfa kısayolları (Space, N, ?) menü açıkken çalışmaz
+      switch (e.key) {
+        case "ArrowDown": e.preventDefault(); setActive(opts[Math.min(i + 1, opts.length - 1)]); break;
+        case "ArrowUp":   e.preventDefault(); setActive(opts[Math.max(i - 1, 0)]); break;
+        case "Home":      e.preventDefault(); setActive(opts[0]); break;
+        case "End":       e.preventDefault(); setActive(opts[opts.length - 1]); break;
+        case "Enter":
+        case " ":         e.preventDefault(); if (opts[i]) choose(opts[i].dataset.value); break;
+        case "Escape":    e.preventDefault(); close(); break;
+        case "Tab":       close({ restoreFocus: false }); break;
+        default: {
+          /* Harfle atlama: dil adının ilk harfi */
+          if (e.key.length === 1) {
+            const k = e.key.toLocaleLowerCase();
+            const start = i + 1;
+            const hit = [...opts.slice(start), ...opts.slice(0, start)]
+              .find((o) => o.textContent.trim().toLocaleLowerCase().startsWith(k));
+            if (hit) setActive(hit);
+          }
+        }
+      }
+    });
+    list.addEventListener("pointermove", (e) => {
+      const li = e.target.closest(".lang-option");
+      if (li && !li.classList.contains("is-active")) setActive(li);
+    });
+
+    /* Dil başka yoldan değişirse (yedekten geri yükleme, ilk açılış) etiket güncel kalsın */
+    onLanguageChange(sync);
+    build();
+  }
+
   /* ---------- Başlat ---------- */
   function init() {
     buildLangSelect(els.langSelect);
@@ -1845,6 +2068,7 @@
 
     const initialLang = detectInitialLang();
     els.langSelect.value = initialLang;
+    initLangMenu();
     applyLanguage(initialLang);
 
     setInterval(() => {
