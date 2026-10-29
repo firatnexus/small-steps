@@ -10,6 +10,7 @@ New look, chosen per platform from the [Refero](https://styles.refero.design/) s
 - **App skin — Things reference** ([style](https://styles.refero.design/style/ec0f5bca-8367-49e7-b8aa-73b3fa09a4a0)): Mist `#f2f5f7` canvas, borderless white cards (18px radius, soft shadow), Signal Blue `#2576eb` accents, system font (Roboto on Android), pill-shaped segmented controls, centered hero with the app tile. Selected automatically in the APK (`data-platform="app"`, also detected at runtime via Capacitor).
 - **Themes:** light, dark, sepia and high contrast are available on both skins; colors were checked for WCAG AA (≥4.5:1 for text and button labels).
 - **Fonts:** Bagel Fat One and the doodle accents (squiggle, background blobs) are removed — the app ships one font less.
+- **Title:** the sprout emoji is dropped from the app title in all 12 languages (#14) — the new logo carries the brand.
 
 ### Logo & branding
 
