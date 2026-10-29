@@ -23,9 +23,21 @@
 
   const THEMES = ["light", "dark", "sepia", "contrast"];
   const THEME_ICONS = { light: "☀️", dark: "🌙", sepia: "📜", contrast: "◐" };
-  const THEME_META_COLORS = {
-    light: "#f2f2f2", dark: "#14161e", sepia: "#f4ecd8", contrast: "#000000"
-  };
+  /* Platform görünümü (v3.6): web = Todoist referansı, uygulama (Android /
+     Capacitor) = Things referansı. Android derlemesi <html data-platform="app">
+     ile gelir; yine de çalışma anında Capacitor algılanırsa garantiye alınır. */
+  const PLATFORM = (() => {
+    const root = document.documentElement;
+    const native = typeof window !== "undefined" && !!window.Capacitor &&
+      (typeof window.Capacitor.isNativePlatform === "function"
+        ? window.Capacitor.isNativePlatform() : true);
+    if (native) root.dataset.platform = "app";
+    else if (!root.dataset.platform) root.dataset.platform = "web";
+    return root.dataset.platform === "app" ? "app" : "web";
+  })();
+  const THEME_META_COLORS = PLATFORM === "app"
+    ? { light: "#f2f5f7", dark: "#1b1d20", sepia: "#f4ecd8", contrast: "#000000" }
+    : { light: "#fefdfc", dark: "#1f1d1b", sepia: "#f4ecd8", contrast: "#000000" };
   const THEME_I18N = {
     light: "themeLight", dark: "themeDark",
     sepia: "themeSepia", contrast: "themeContrast"
@@ -1868,7 +1880,7 @@
                      document.body.appendChild(splashTemplate.cloneNode(true));
         /* Belge gizli yüklenmişse CSS giriş animasyonları arka planda
            bitmiş olabilir; görünür olunca bir kez daha oynat. */
-        node.querySelectorAll(".splash-sprout, .splash-name, .splash-tag")
+        node.querySelectorAll(".splash-logo, .splash-name, .splash-tag")
           .forEach((el) => {
             el.style.animation = "none";
             void el.offsetHeight; /* reflow: animasyonu sıfırla */

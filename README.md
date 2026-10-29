@@ -9,9 +9,9 @@ Zero dependencies · 12 languages · Installable PWA · Your data never leaves y
 
 <br/>
 
-[![Version](https://img.shields.io/badge/version-3.5.1-151b31?style=flat-square)](../../releases)
+[![Version](https://img.shields.io/badge/version-3.6.0-cf3520?style=flat-square)](../../releases)
 [![Android APK](https://img.shields.io/badge/Android-APK-3ddc84?style=flat-square&logo=android&logoColor=white)](../../releases)
-[![CI](https://img.shields.io/badge/CI-passing-151b31?style=flat-square)](../../actions)
+[![CI](https://img.shields.io/badge/CI-passing-25221e?style=flat-square)](../../actions)
 [![PWA](https://img.shields.io/badge/PWA-installable-5a0fc8?style=flat-square)](#-pwa-installation)
 [![Languages](https://img.shields.io/badge/languages-12-important?style=flat-square)](#-languages)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
@@ -19,7 +19,7 @@ Zero dependencies · 12 languages · Installable PWA · Your data never leaves y
 
 <br/>
 
-[![Try It Online](https://img.shields.io/badge/🌐%20Try%20It%20Online-firatnexus.github.io-151b31?style=for-the-badge)](https://firatnexus.github.io/small-steps/)
+[![Try It Online](https://img.shields.io/badge/🌐%20Try%20It%20Online-firatnexus.github.io-cf3520?style=for-the-badge)](https://firatnexus.github.io/small-steps/)
 
 <br/>
 
@@ -80,7 +80,8 @@ Zero dependencies · 12 languages · Installable PWA · Your data never leaves y
 
 ### 🎨 Interface
 
-- 4 themes: light, dark, sepia, high contrast
+- **Two native-feeling skins:** the website follows a Todoist-style warm paper planner (Inter, ember-red actions, two-column desktop layout); the Android app follows a Things-style iOS-calm look (mist canvas, white cards, signal blue, system font). Design references live in [`refero/`](refero/)
+- 4 themes: light, dark, sepia, high contrast — on both skins
 - Full RTL support (Arabic) and 12 languages
 - Keyboard shortcuts (`?` shows the cheat sheet), screen-reader friendly
 - **GitHub star badge** in the top bar — the repo's live star count, styled exactly like GitHub's own badge; tapping it opens the repository
@@ -182,7 +183,7 @@ const DEFAULT_SETTINGS = {
 
 ### 🎨 Color Palette
 
-CSS custom properties in `style.css` (`--green`, `--break`, `--bg`, …) per theme block. Change once, all themes stay in sync.
+CSS custom properties in `style.css` (`--accent`, `--brand`, `--bg`, `--card`, …) per platform (`html[data-platform="web"|"app"]`) and theme block. Change once, all themes stay in sync.
 
 ### 🌍 Add a Language
 

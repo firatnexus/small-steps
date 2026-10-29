@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr" data-platform="web">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f2f2f2">
+  <meta name="theme-color" content="#fefdfc">
   <meta name="description" content="Task list and Pomodoro timer — offline-first, 12 languages, zero dependencies.">
   <title>Small Steps — Your daily focus space</title>
 
@@ -31,32 +31,15 @@
 
   <link rel="stylesheet" href="style.css">
   <link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/bagel-latin.woff2" as="font" type="font/woff2" crossorigin>
 </head>
 <body>
-  <!-- Dekoratif zemin lekeleri — yalnızca atmosfer -->
-  <svg class="blob blob-mint" viewBox="0 0 200 180" aria-hidden="true" focusable="false"><path d="M43.7,-76.3C56.9,-70.4,68.2,-58.3,74.6,-44.3C81,-30.3,82.5,-14.4,79.5,-0.1C76.5,14.2,69,27.3,58.7,37.1C48.4,46.9,35.3,53.4,20.9,57.7C6.5,62,-9.2,64.1,-23.4,60.2C-37.6,56.3,-50.3,46.4,-59.3,33.5C-68.3,20.6,-73.6,4.7,-71.7,-10.5C-69.8,-25.7,-60.7,-40.2,-48.5,-50.2C-36.3,-60.2,-18.1,-65.7,-1.1,-64.2C16,-62.7,30.5,-82.2,43.7,-76.3Z" transform="translate(100 90)"/></svg>
-  <svg class="blob blob-butter" viewBox="0 0 200 180" aria-hidden="true" focusable="false"><path d="M41.6,-70.6C55.1,-64.4,67.5,-53.9,73.6,-40.5C79.7,-27.1,79.5,-10.8,75.9,4.1C72.3,19,65.3,32.5,54.4,42.4C43.5,52.3,28.7,58.6,13.4,61.4C-1.9,64.2,-16.7,63.5,-29.6,57.5C-42.5,51.5,-53.5,40.2,-60.4,26.6C-67.3,13,-70.1,-2.8,-66.7,-17.1C-63.3,-31.4,-53.7,-44.2,-41.4,-53.7C-29.1,-63.2,-14.5,-69.4,0.4,-70C15.3,-70.6,28.1,-76.8,41.6,-70.6Z" transform="translate(100 90)"/></svg>
   <!-- Açılış ekranı: uygulama hazır olunca solup kaldırılır -->
   <div id="splash" aria-hidden="true">
     <div class="splash-inner">
-      <svg class="splash-sprout" viewBox="0 0 96 96" fill="none" aria-hidden="true" focusable="false">
-        <g class="splash-foot" transform="rotate(-8 34 50)">
-          <ellipse cx="34" cy="60" rx="11" ry="16"/>
-          <circle cx="21" cy="40" r="3.2"/>
-          <circle cx="29" cy="35" r="3"/>
-          <circle cx="38" cy="34" r="2.8"/>
-          <circle cx="46" cy="36" r="2.6"/>
-          <circle cx="51" cy="42" r="2.4"/>
-        </g>
-        <g class="splash-foot" transform="translate(28 -24) rotate(8 34 50)">
-          <ellipse cx="34" cy="60" rx="10.4" ry="15.2"/>
-          <circle cx="21" cy="41" r="3"/>
-          <circle cx="29" cy="36" r="2.8"/>
-          <circle cx="38" cy="35" r="2.7"/>
-          <circle cx="45" cy="37" r="2.5"/>
-          <circle cx="50" cy="42" r="2.3"/>
-        </g>
+      <svg class="splash-logo" width="88" height="88" viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+        <rect class="logo-tile" width="96" height="96" rx="22"/>
+        <path class="logo-mark" d="M16.5 70H32.5V56H48.5V42H64.5V28" fill="none" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle class="logo-dot" cx="77.5" cy="28" r="6.5"/>
       </svg>
       <p class="splash-name">Small Steps</p>
       <p class="splash-tag">Find your own pace</p>
@@ -81,31 +64,14 @@
     <!-- Başlık -->
     <header>
       <div class="brand-row">
-        <svg class="brand-mark" width="26" height="26" viewBox="0 0 96 96" fill="currentColor" aria-hidden="true" focusable="false">
-          <g transform="rotate(-8 34 50)">
-            <ellipse cx="34" cy="60" rx="11" ry="16"/>
-            <circle cx="21" cy="40" r="3.2"/>
-            <circle cx="29" cy="35" r="3"/>
-            <circle cx="38" cy="34" r="2.8"/>
-            <circle cx="46" cy="36" r="2.6"/>
-            <circle cx="51" cy="42" r="2.4"/>
-          </g>
-          <g transform="translate(28 -24) rotate(8 34 50)">
-            <ellipse cx="34" cy="60" rx="10.4" ry="15.2"/>
-            <circle cx="21" cy="41" r="3"/>
-            <circle cx="29" cy="36" r="2.8"/>
-            <circle cx="38" cy="35" r="2.7"/>
-            <circle cx="45" cy="37" r="2.5"/>
-            <circle cx="50" cy="42" r="2.3"/>
-          </g>
+        <svg class="brand-mark" width="28" height="28" viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+          <rect class="logo-tile" width="96" height="96" rx="22"/>
+          <path class="logo-mark" d="M16.5 70H32.5V56H48.5V42H64.5V28" fill="none" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle class="logo-dot" cx="77.5" cy="28" r="6.5"/>
         </svg>
         <p class="eyebrow" data-i18n="eyebrow"></p>
       </div>
       <h1 data-i18n="title"></h1>
-      <svg class="squiggle" width="170" height="14" viewBox="0 0 170 14" fill="none" aria-hidden="true" focusable="false">
-        <path d="M3 8 C 14 2, 22 12, 34 7 S 56 2, 68 8 S 90 12, 102 6 S 126 3, 138 8 S 158 10, 167 5"
-          stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-      </svg>
       <p class="intro" data-i18n="intro"></p>
     </header>
 

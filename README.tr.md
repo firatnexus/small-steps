@@ -9,9 +9,9 @@ Sıfır bağımlılık · 12 dil · Kurulum yapılabilen PWA · Verilerin taray�
 
 <br/>
 
-[![Version](https://img.shields.io/badge/version-3.5.1-151b31?style=flat-square)](../../releases)
+[![Version](https://img.shields.io/badge/version-3.6.0-cf3520?style=flat-square)](../../releases)
 [![Android APK](https://img.shields.io/badge/Android-APK-3ddc84?style=flat-square&logo=android&logoColor=white)](../../releases)
-[![CI](https://img.shields.io/badge/CI-passing-151b31?style=flat-square)](../../actions)
+[![CI](https://img.shields.io/badge/CI-passing-25221e?style=flat-square)](../../actions)
 [![PWA](https://img.shields.io/badge/PWA-installable-5a0fc8?style=flat-square)](#-pwa-kurulumu)
 [![Languages](https://img.shields.io/badge/languages-12-important?style=flat-square)](#-diller)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
@@ -19,7 +19,7 @@ Sıfır bağımlılık · 12 dil · Kurulum yapılabilen PWA · Verilerin taray�
 
 <br/>
 
-[![Try It Online](https://img.shields.io/badge/🌐%20Şimdi%20Dene-firatnexus.github.io-151b31?style=for-the-badge)](https://firatnexus.github.io/small-steps/)
+[![Try It Online](https://img.shields.io/badge/🌐%20Şimdi%20Dene-firatnexus.github.io-cf3520?style=for-the-badge)](https://firatnexus.github.io/small-steps/)
 
 <br/>
 
@@ -80,7 +80,8 @@ Sıfır bağımlılık · 12 dil · Kurulum yapılabilen PWA · Verilerin taray�
 
 ### 🎨 Arayüz
 
-- 4 tema: açık, koyu, sepya, yüksek kontrast
+- **Platforma özel iki görünüm:** web sitesi Todoist tarzı sıcak kâğıt planlayıcı dilini (Inter, köz kırmızısı eylemler, masaüstünde iki sütun), Android uygulaması Things tarzı sakin iOS dilini (sis zemin, beyaz kartlar, sinyal mavisi, sistem yazı tipi) kullanır. Tasarım referansları [`refero/`](refero/) klasöründe
+- 4 tema: açık, koyu, sepya, yüksek kontrast — her iki görünümde
 - Tam RTL desteği (Arapça) ve 12 dil
 - Klavye kısayolları (`?` kılavuzu gösterir), ekran okuyucu dostu
 - **GitHub yıldız rozeti** — üst çubukta, GitHub'ın kendi rozetiyle birebir aynı stilde canlı yıldız sayısı; dokununca depo adresi açılır
@@ -180,7 +181,7 @@ const DEFAULT_SETTINGS = {
 
 ### 🎨 Renk Paleti
 
-`style.css` içinde tema başına CSS özel değişkenleri (`--green`, `--break`, `--bg`, …). Tek yerden değiştir, tüm temalar güncellensin.
+`style.css` içinde platform (`html[data-platform="web"|"app"]`) ve tema başına CSS özel değişkenleri (`--accent`, `--brand`, `--bg`, `--card`, …). Tek yerden değiştir, tüm temalar güncellensin.
 
 ### 🌍 Dil Ekleme
 

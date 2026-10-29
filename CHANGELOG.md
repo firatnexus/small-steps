@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.6.0 — 2026-10-29
+
+New look, chosen per platform from the [Refero](https://styles.refero.design/) style library. The website and the Android app now each wear the design language that fits them best. No behavior changed: tasks, timer, forest, history, backups and shortcuts work exactly as before.
+
+### Changed
+
+- **Web skin — Todoist reference** ([style](https://styles.refero.design/style/729ba7a8-35d5-44f3-abc0-1078ff6a3467)): warm Paper `#fefdfc` canvas with a Cream `#fff6f0` header band, Ink `#25221e` text, Ember `#cf3520` primary actions, Mint Wash / Forest greens for progress and the heatmap, 8px radii, Inter throughout. On desktop (≥1024px) tasks and the timer sit side by side again, with the timer sticky.
+- **App skin — Things reference** ([style](https://styles.refero.design/style/ec0f5bca-8367-49e7-b8aa-73b3fa09a4a0)): Mist `#f2f5f7` canvas, borderless white cards (18px radius, soft shadow), Signal Blue `#2576eb` accents, system font (Roboto on Android), pill-shaped segmented controls, centered hero with the app tile. Selected automatically in the APK (`data-platform="app"`, also detected at runtime via Capacitor).
+- **Themes:** light, dark, sepia and high contrast are available on both skins; colors were checked for WCAG AA (≥4.5:1 for text and button labels).
+- **Fonts:** Bagel Fat One and the doodle accents (squiggle, background blobs) are removed — the app ships one font less.
+
+### Logo & branding
+
+- **New minimal logo:** three rising steps ending at a destination dot, on a rounded tile. Two colorways: Ink tile + Ember dot on the web, Signal Blue tile + white mark in the app.
+- Updated: `icon.svg` (PWA + README), in-app header and splash logo, Android adaptive icon (vector + PNG foreground, `#2576eb` background, new themed-icon monochrome layer), legacy and round launcher PNGs for every density, all 11 splash PNGs (Mist canvas), Android 12+ splash background, `social-preview.png`, README screenshots.
+- All raster assets are reproducible with `tools/brand/generate-assets.py`.
+
+### Version
+
+- `versionName` 3.6.0, `versionCode` 30600; PWA cache `minik-adimlar-v3.6.0`.
+
 ## 3.5.1 — 2026-10-28
 
 Patch release fixing two visual defects found in the 3.5.0 redesign. No functional changes.
