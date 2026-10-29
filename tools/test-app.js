@@ -1356,6 +1356,157 @@ const settled = (ms = 250) => new Promise((r) => setTimeout(r, ms));
     });
   }
 
+  console.log("\n— Kaydırma regresyonu, dil menüsü, üst çubuk (v3.6.1) —");
+  {
+    /* Kök neden: renderForest → scrollForestToToday() içindeki
+       scrollIntoView({block:"nearest"}) pencereyi de kaydırıyordu; her görev
+       ekleme/filtre/silme ve mobil klavye (resize) sayfayı orman kartına
+       atlatıyordu. Düzeltme: yalnızca #forest-scene.scrollLeft değişir. */
+    async function launchOverflowingForest() {
+      const dom = await launch();
+      const w = dom.window;
+      const scene = w.document.querySelector("#forest-scene");
+      Object.defineProperty(scene, "scrollWidth", { configurable: true, get: () => 1000 });
+      Object.defineProperty(scene, "clientWidth", { configurable: true, get: () => 300 });
+      /* Varsayılan öğeler görünür alanın içinde (top 100) — gerçek tarayıcıdaki
+         gibi; böylece görünür bir alana odaklanmak kaydırma gerektirmez. */
+      const rect = (l, r) => ({ left: l, right: r, top: 100, bottom: 120, width: r - l, height: 20, x: l, y: 100 });
+      w.HTMLElement.prototype.getBoundingClientRect = function () {
+        if (this.id === "forest-scene") return rect(0, 300);
+        if (this.classList.contains("today")) return rect(900 - scene.scrollLeft, 930 - scene.scrollLeft);
+        return rect(0, 0);
+      };
+      const calls = { intoView: 0, windowScroll: 0 };
+      w.Element.prototype.scrollIntoView = function () { calls.intoView++; };
+      w.scrollTo = () => { calls.windowScroll++; };
+      w.scrollBy = () => { calls.windowScroll++; };
+      return { dom, w, scene, calls };
+    }
+
+    await test("Filtre, ekleme, tamamlama ve silme pencereyi kaydırmaz (orman taşarken)", async () => {
+      const { dom, w, scene, calls } = await launchOverflowingForest();
+      const doc = w.document;
+      doc.querySelector("#task-input").value = "Kaydırma testi";
+      doc.querySelector("#task-form").dispatchEvent(new w.Event("submit", { cancelable: true }));
+      doc.querySelector('.chip[data-filter="active"]').click();
+      doc.querySelector('.chip[data-filter="done"]').click();
+      doc.querySelector('.chip[data-filter="all"]').click();
+      const cb = doc.querySelector('#task-list .task input[type="checkbox"]');
+      cb.click();
+      doc.querySelector("#task-list .task .danger").click();
+      await settled();
+      eq(calls.intoView, 0, "scrollIntoView çağrıldı — pencere kayabilir");
+      eq(calls.windowScroll, 0, "pencere programatik olarak kaydırıldı");
+      eq(scene.scrollLeft, 638, "orman şeridi bugüne yatay kaydırılmadı");
+      dom.window.close();
+    });
+
+    await test("Pencere boyu değişince (mobil klavye) yalnızca orman şeridi kayar", async () => {
+      const { dom, w, scene, calls } = await launchOverflowingForest();
+      scene.scrollLeft = 0;
+      w.dispatchEvent(new w.Event("resize"));
+      await settled(260);
+      eq(calls.intoView, 0, "resize sonrası scrollIntoView çağrıldı");
+      eq(calls.windowScroll, 0, "resize sonrası pencere kaydı");
+      eq(scene.scrollLeft, 638, "resize sonrası orman bugüne hizalanmadı");
+      dom.window.close();
+    });
+
+    await test("Satır içi düzenleme/alt görev girişleri preventScroll ile odaklanır", async () => {
+      const dom = await launch();
+      const w = dom.window, doc = w.document;
+      const seen = [];
+      const origFocus = w.HTMLElement.prototype.focus;
+      w.HTMLElement.prototype.focus = function (opts) { seen.push({ el: this, opts }); return origFocus.call(this, opts); };
+      doc.querySelector("#task-input").value = "Odak testi";
+      doc.querySelector("#task-form").dispatchEvent(new w.Event("submit", { cancelable: true }));
+      const formFocus = seen.find((f) => f.el.id === "task-input");
+      assert(formFocus && formFocus.opts && formFocus.opts.preventScroll, "ekleme sonrası giriş preventScroll'suz odaklandı");
+      doc.querySelector("#task-list .task .icon-btn[aria-label]").parentElement
+        .querySelectorAll(".icon-btn")[2].click(); // düzenle
+      const edit = seen.find((f) => f.el.classList && f.el.classList.contains("edit-input"));
+      assert(edit && edit.opts && edit.opts.preventScroll, "düzenleme girişi preventScroll'suz odaklandı");
+      edit.el.dispatchEvent(new w.KeyboardEvent("keydown", { key: "Escape", cancelable: true }));
+      doc.querySelector("#task-list .task .subtask-btn").click();
+      const sub = seen.find((f) => f.el.closest && f.el.closest(".subtask-add"));
+      assert(sub && sub.opts && sub.opts.preventScroll, "alt görev girişi preventScroll'suz odaklandı");
+      dom.window.close();
+    });
+
+    await test("Kaynakta pencereyi kaydırabilen orman scrollIntoView'u kalmadı", () => {
+      const fn = appSrc.slice(appSrc.indexOf("function scrollForestToToday"),
+        appSrc.indexOf("/* ---------- 90 günlük ısı haritası"));
+      assert(fn.length > 0, "scrollForestToToday bulunamadı");
+      assert(!fn.includes("scrollIntoView("), "scrollForestToToday yine scrollIntoView kullanıyor");
+    });
+
+    await test("Dil menüsü: açılır, seçili dil işaretli, seçimle dil değişir ve kapanır", async () => {
+      const dom = await launch();
+      const w = dom.window, doc = w.document;
+      const trigger = doc.querySelector("#lang-trigger");
+      const list = doc.querySelector("#lang-list");
+      assert(trigger && list, "dil menüsü öğeleri yok");
+      eq(list.hidden, true, "liste başta açık");
+      trigger.click();
+      eq(trigger.getAttribute("aria-expanded"), "true");
+      eq(list.hidden, false, "liste açılmadı");
+      const opts = list.querySelectorAll('[role="option"]');
+      eq(opts.length, w.i18n.SUPPORTED_LANGS.length, "tüm diller listede değil");
+      const selected = list.querySelectorAll('[aria-selected="true"]');
+      eq(selected.length, 1, "tam olarak bir seçili dil olmalı");
+      eq(selected[0].dataset.value, w.i18n.getLang(), "seçili işaret mevcut dilde değil");
+      list.querySelector('[data-value="de"]').click();
+      eq(w.i18n.getLang(), "de", "dil değişmedi");
+      eq(doc.querySelector("#lang-select").value, "de", "gizli select güncellenmedi");
+      eq(list.hidden, true, "seçimden sonra liste kapanmadı");
+      eq(trigger.getAttribute("aria-expanded"), "false");
+      eq(doc.querySelector("#lang-trigger-label").textContent, "Deutsch", "tetikleyici etiketi güncellenmedi");
+      dom.window.close();
+    });
+
+    await test("Dil menüsü Esc ve dışarı dokunmayla kapanır; Space zamanlayıcıyı başlatmaz", async () => {
+      const dom = await launch();
+      const w = dom.window, doc = w.document;
+      const trigger = doc.querySelector("#lang-trigger");
+      const list = doc.querySelector("#lang-list");
+      trigger.click();
+      doc.activeElement.dispatchEvent(new w.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+      eq(list.hidden, true, "Esc ile kapanmadı");
+      trigger.click();
+      doc.querySelector("h1").dispatchEvent(new w.Event("pointerdown", { bubbles: true }));
+      eq(list.hidden, true, "dışarı dokununca kapanmadı");
+      const before = doc.body.dataset.running;
+      trigger.dispatchEvent(new w.KeyboardEvent("keydown", { key: " ", code: "Space", bubbles: true, cancelable: true }));
+      eq(list.hidden, false, "Space menüyü açmadı");
+      eq(doc.body.dataset.running, before, "Space zamanlayıcı kısayolunu tetikledi");
+      dom.window.close();
+    });
+
+    await test("Yedekten geri yüklenen dil, menü etiketine yansır", async () => {
+      const dom = await launch();
+      const w = dom.window;
+      w.i18n.setLanguage("fr");
+      w.document.querySelector("#lang-select").value = "fr";
+      w.i18n.applyLanguage("fr");
+      eq(w.document.querySelector("#lang-trigger-label").textContent, "Français");
+      dom.window.close();
+    });
+
+    await test("Üst çubuk sırası: dil, GitHub yıldızı, ?, tema", async () => {
+      const dom = await launch();
+      const ids = Array.from(dom.window.document.querySelector(".topbar").children).map((el) => el.id);
+      eq(ids.join(","), "lang-menu,gh-star,help-toggle,theme-toggle");
+      dom.window.close();
+    });
+
+    await test("Üst güvenli alan CSS'te uygulanıyor (Capacitor değişkeni + env)", () => {
+      const css = fs.readFileSync(path.join(root, "style.css"), "utf8");
+      assert(/--safe-top:\s*var\(--safe-area-inset-top,\s*env\(safe-area-inset-top/.test(css), "--safe-top tanımı yok");
+      assert(/body\s*{\s*padding-top:\s*var\(--safe-top\)/.test(css), "body üst güvenli alan dolgusu yok");
+      assert(html.includes("viewport-fit=cover"), "viewport-fit=cover kaldırılmış");
+    });
+  }
+
   console.log(`\nSonuç: ${pass} geçti, ${fail} başarısız`);
   process.exit(fail ? 1 : 0);
 })().catch((err) => {

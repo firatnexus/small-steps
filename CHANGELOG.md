@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.6.1 — 2026-10-29
+
+Bug-fix and interaction-polish release. No features removed; design unchanged apart from the new language menu.
+
+### Fixed
+
+- **Page jumped while working with tasks (mobile):** adding a task, switching the All / Active / Done filters, completing, editing, prioritising, adding a subtask or deleting made the page leap to the Forest card. Root cause: every task re-render also re-rendered the forest, whose "scroll to today" helper used `scrollIntoView({ block: "nearest" })` — that scrolls *every* scrollable ancestor, including the window, whenever the forest strip overflows horizontally (always on phones). The same helper ran on `resize`, so opening the virtual keyboard on the task field also jumped. The helper now only adjusts the forest strip's own `scrollLeft`; the page's vertical position is never touched.
+- **Inline inputs re-centred the page:** the edit and subtask inputs (and the task field after "Add") now focus with `preventScroll` and only scroll the minimum amount if the field is actually outside the visible (keyboard-reduced) viewport.
+- **Header under the status bar (Android):** with `viewport-fit=cover` and Capacitor 8 the WebView draws edge-to-edge, but no rule applied the top inset. The page now pads by `--safe-area-inset-top` (injected by Capacitor) with an `env(safe-area-inset-top)` fallback, applied once on `<body>`. Status-bar icon colour now follows the app theme (dark icons on light/sepia, light icons on dark/high-contrast) instead of the phone's system theme.
+
+### Changed
+
+- **Language menu:** the native select popup is replaced by an anchored dropdown under the language button — short fade/slide/scale opening, checkmark on the current language, hover/pressed/focus states, keyboard support (arrows, Home/End, type-ahead, Enter/Space, Esc, Tab), closes on selection, outside tap or Esc, stays inside the viewport and scrolls internally when space is short. Respects reduced motion, RTL (Arabic) and all four themes. The hidden `<select>` stays the single source of truth, so backups and existing language logic are unchanged.
+- **Web top bar:** the GitHub star badge and the `?` shortcuts button swapped places (language · GitHub · ? · theme).
+
+### Tests
+
+- 9 new regression tests (86 total): no window scrolling on add/filter/complete/delete/resize while the forest overflows, `preventScroll` focus for inline inputs, language menu open/select/close/Esc/outside/Space, restored-language label, top-bar order, safe-area CSS.
+
 ## 3.6.0 — 2026-10-29
 
 New look, chosen per platform from the [Refero](https://styles.refero.design/) style library. The website and the Android app now each wear the design language that fits them best. No behavior changed: tasks, timer, forest, history, backups and shortcuts work exactly as before.
